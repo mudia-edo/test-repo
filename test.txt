@@ -1,3 +1,5 @@
 I am making progress in this class.
 
 I am making more progress in this class.
+
+I made a change to test authentication.
