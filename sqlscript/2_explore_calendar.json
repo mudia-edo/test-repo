@@ -1,0 +1,20 @@
+{
+	"name": "2_explore_calendar",
+	"properties": {
+		"folder": {
+			"name": "nyc_taxi/discovery"
+		},
+		"content": {
+			"query": "USE nyc_taxi_discovery;\n\nSELECT\n    *\nFROM\n    OPENROWSET(\n        BULK 'calendar.csv',\n        FORMAT = 'CSV',\n        DATA_SOURCE = 'nyc_taxi_data_raw',\n        PARSER_VERSION = '2.0',\n        HEADER_ROW = TRUE,\n        --FIRSTROW = 2,\n        FIELDTERMINATOR = ',',\n        ROWTERMINATOR = '\\n'\n    ) AS [result]\n\n\n\n--explore the data types and number of columns\nEXEC sp_describe_first_result_set N'SELECT\n*\nFROM\n    OPENROWSET(\n        BULK ''calendar.csv'',\n        FORMAT = ''CSV'',\n        DATA_SOURCE = ''nyc_taxi_data_raw'',\n        PARSER_VERSION = ''2.0'',\n        HEADER_ROW = TRUE,\n        --FIRSTROW = 2,\n        FIELDTERMINATOR = '','',\n        ROWTERMINATOR = ''\\n''\n    ) AS [result]'",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "nyc_taxi_discovery",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

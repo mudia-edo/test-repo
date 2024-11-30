@@ -1,0 +1,20 @@
+{
+	"name": "12_join_data",
+	"properties": {
+		"folder": {
+			"name": "nyc_taxi/discovery"
+		},
+		"content": {
+			"query": "use nyc_taxi_discovery;\n\n-- identify number of trips made from each of the borough--\n\n--using Trip_data = parquet file.\n--look for NULL values in PULocationID column\nSELECT\n    TOP 100 *\nFROM\n    OPENROWSET(\n        BULK 'trip_data_green_parquet/year=2020/month=01/',\n        FORMAT = 'PARQUET',\n        DATA_SOURCE = 'nyc_taxi_data_raw'\n    ) AS [result]\n    WHERE PULocationID IS NULL\n\n--join the data with taxi_zone\nSELECT \ntrip_data.*,\ntaxi_zone.*\nFROM\nOPENROWSET(\n        BULK 'trip_data_green_parquet/year=2020/month=01/',\n        FORMAT = 'PARQUET',\n        DATA_SOURCE = 'nyc_taxi_data_raw'\n        ) AS [trip_data]\n\n    JOIN\n\nOPENROWSET(\n        BULK 'raw/taxi_zone.csv',\n        DATA_SOURCE = 'nyc_taxi_data',\n        FORMAT = 'CSV',\n        PARSER_VERSION = '2.0',\n        --HEADER_ROW = TRUE,\n        FIRSTROW = 2,\n        FIELDTERMINATOR = ',',\n        ROWTERMINATOR = '\\n'\n    ) \n    WITH(\n        locationID SMALLINT 1,\n        borough VARCHAR(15) 2,\n        zone VARCHAR(50) 3,\n        service_zone VARCHAR(15) 4\n    \n    )\n    AS [taxi_zone]\nON trip_data.PULocationID = taxi_zone.locationID;\n\n\n--doing a count based on the borough\nSELECT \n--trip_data.*,\ntaxi_zone.borough,\nCount(1) AS total_number_of_trips\nFROM\nOPENROWSET(\n        BULK 'trip_data_green_parquet/year=2020/month=01/',\n        FORMAT = 'PARQUET',\n        DATA_SOURCE = 'nyc_taxi_data_raw'\n        ) AS [trip_data]\n\n    JOIN\n\nOPENROWSET(\n        BULK 'raw/taxi_zone.csv',\n        DATA_SOURCE = 'nyc_taxi_data',\n        FORMAT = 'CSV',\n        PARSER_VERSION = '2.0',\n        --HEADER_ROW = TRUE,\n        FIRSTROW = 2,\n        FIELDTERMINATOR = ',',\n        ROWTERMINATOR = '\\n'\n    ) \n    WITH(\n        locationID SMALLINT 1,\n        borough VARCHAR(15) 2,\n        zone VARCHAR(50) 3,\n        service_zone VARCHAR(15) 4\n    \n    )\n    AS [taxi_zone]\nON trip_data.PULocationID = taxi_zone.locationID\nGROUP BY taxi_zone.borough\nORDER BY taxi_zone.borough;\n\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "nyc_taxi_discovery",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

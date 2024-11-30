@@ -1,0 +1,20 @@
+{
+	"name": "10_check_for-duplicates",
+	"properties": {
+		"folder": {
+			"name": "nyc_taxi/discovery"
+		},
+		"content": {
+			"query": "Use nyc_taxi_discovery;\n\n--Check for duplicates in taxi zone data\n--identify the primary key \nSELECT\n    locationID, --primary key\n    COUNT(1) AS number_of_records\nFROM\n    OPENROWSET(\n        BULK 'https://mudiasynapsedatalake.dfs.core.windows.net/nyc-taxi-data/raw/taxi_zone.csv',\n        FORMAT = 'CSV',\n        PARSER_VERSION = '2.0',\n        --HEADER_ROW = TRUE,\n        FIRSTROW = 2,\n        FIELDTERMINATOR = ',',\n        ROWTERMINATOR = '\\n'\n    ) \n    WITH(\n        locationID SMALLINT 1,\n        borough VARCHAR(15) 2,\n        zone VARCHAR(50) 3,\n        service_zone VARCHAR(15) 4\n    )AS [result]\n    GROUP BY LocationID\n    HAVING COUNT(1) > 1;",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "nyc_taxi_discovery",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
