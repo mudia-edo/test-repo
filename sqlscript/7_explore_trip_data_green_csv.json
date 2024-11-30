@@ -1,0 +1,20 @@
+{
+	"name": "7_explore_trip_data_green_csv",
+	"properties": {
+		"folder": {
+			"name": "nyc_taxi/discovery"
+		},
+		"content": {
+			"query": "--select data froma  file\nSELECT\n    TOP 100 *\nFROM\n    OPENROWSET(\n        BULK 'trip_data_green_csv/year=2020/month=01/green_tripdata_2020-01.csv',\n        FORMAT = 'CSV',\n        DATA_SOURCE = 'nyc_taxi_data_raw',\n        PARSER_VERSION = '2.0',\n        HEADER_ROW = TRUE\n    ) AS [result]\n\n\n\n--select all data from a folder with use of wild card *\nSELECT\n    TOP 100 *\nFROM\n    OPENROWSET(\n        BULK 'trip_data_green_csv/year=2020/month=01/*.csv',\n        FORMAT = 'CSV',\n        DATA_SOURCE = 'nyc_taxi_data_raw',\n        PARSER_VERSION = '2.0',\n        HEADER_ROW = TRUE\n    ) AS [result]\n\n\n--select data from subfolders, use of **\nSELECT\n    TOP 100 *\nFROM\n    OPENROWSET(\n        BULK 'trip_data_green_csv/year=2020/**',\n        FORMAT = 'CSV',\n        DATA_SOURCE = 'nyc_taxi_data_raw',\n        PARSER_VERSION = '2.0',\n        HEADER_ROW = TRUE\n    ) AS [result]\n\n--select data from couple of folders\nSELECT\n    TOP 100 *\nFROM\n    OPENROWSET(\n        BULK ('trip_data_green_csv/year=2020/month=01/*.csv',\n        'trip_data_green_csv/year=2020/month=02/*.csv'),\n        FORMAT = 'CSV',\n        DATA_SOURCE = 'nyc_taxi_data_raw',\n        PARSER_VERSION = '2.0',\n        HEADER_ROW = TRUE\n    ) AS [result]\n\n\n\n--select data from all folders and all files\nSELECT\n    TOP 100 *\nFROM\n    OPENROWSET(\n        BULK 'trip_data_green_csv/year=*/month=*/*.csv',\n        FORMAT = 'CSV',\n        DATA_SOURCE = 'nyc_taxi_data_raw',\n        PARSER_VERSION = '2.0',\n        HEADER_ROW = TRUE\n    ) AS [result]\n\n\n\n--file metadata function filename()\nSELECT\n    TOP 100 \n    result.filename() AS file_name,\n    result.*\nFROM\n    OPENROWSET(\n        BULK 'trip_data_green_csv/year=*/month=*/*.csv',\n        FORMAT = 'CSV',\n        DATA_SOURCE = 'nyc_taxi_data_raw',\n        PARSER_VERSION = '2.0',\n        HEADER_ROW = TRUE\n    ) AS [result]\n\n\n\n--count records in each folder\nSELECT\n    result.filename() AS file_name,\n    count(1) AS record_count\nFROM\n    OPENROWSET(\n        BULK 'trip_data_green_csv/year=*/month=*/*.csv',\n        FORMAT = 'CSV',\n        DATA_SOURCE = 'nyc_taxi_data_raw',\n        PARSER_VERSION = '2.0',\n        HEADER_ROW = TRUE\n    ) AS [result]\nGROUP BY result.filename()\nORDER BY result.filename();\n\n\n--filepath function filepath()\nSELECT\n    result.filename() AS file_name,\n    result.filepath() AS file_path,\n    count(1) AS record_count\nFROM\n    OPENROWSET(\n        BULK 'trip_data_green_csv/year=*/month=*/*.csv',\n        FORMAT = 'CSV',\n        DATA_SOURCE = 'nyc_taxi_data_raw',\n        PARSER_VERSION = '2.0',\n        HEADER_ROW = TRUE\n    ) AS [result]\nGROUP BY result.filename(), result.filepath()\nORDER BY result.filename(), result.filepath();\n\n\n--select using a where clause filepath() based on wildcard number\nSELECT\n    result.filename() AS file_name,\n    result.filepath(1) AS year,\n    result.filepath(2) AS month,\n    count(1) AS record_count\nFROM\n    OPENROWSET(\n        BULK 'trip_data_green_csv/year=*/month=*/*.csv',\n        FORMAT = 'CSV',\n        DATA_SOURCE = 'nyc_taxi_data_raw',\n        PARSER_VERSION = '2.0',\n        HEADER_ROW = TRUE\n    ) AS [result]\n    WHERE result.filepath(1) = '2020'\n    AND result.filepath(2) IN ('04', '05', '06')\n\nGROUP BY result.filename(), result.filepath(1), result.filepath(2)\nORDER BY result.filename(), result.filepath(1), result.filepath(2);\n\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "nyc_taxi_discovery",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
